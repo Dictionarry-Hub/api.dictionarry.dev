@@ -31,6 +31,10 @@
     {
       "name": "PCD",
       "description": "PCD entity export and portable format endpoints"
+    },
+    {
+      "name": "Regex",
+      "description": "Regex pattern validation"
     }
   ],
   "paths": {
@@ -672,6 +676,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/regex/validate": {
+      "post": {
+        "operationId": "validateRegex",
+        "summary": "Validate a .NET regex pattern",
+        "description": "Validates a regex pattern using the .NET regex engine (via the parser service).\nThis matches the exact validation Radarr and Sonarr perform when importing custom formats.\nIf the parser service is offline, returns { valid: true } to avoid blocking saves.\n",
+        "tags": [
+          "Regex"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRegexRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateRegexResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing pattern"
           }
         }
       }
@@ -2370,6 +2409,40 @@
               "type": "object",
               "description": "Quality definition entry with min/max/preferred sizes"
             }
+          }
+        }
+      },
+      "ValidateRegexRequest": {
+        "type": "object",
+        "required": [
+          "pattern"
+        ],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "The .NET regex pattern to validate"
+          }
+        }
+      },
+      "ValidateRegexResponse": {
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the pattern is a valid .NET regex"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "The .NET ArgumentException message if invalid"
+          },
+          "available": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the parser service was reachable. False means validation was skipped."
           }
         }
       }
